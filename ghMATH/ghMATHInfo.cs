@@ -33,7 +33,7 @@ namespace ghMATH
         {
             get
             {
-                return new Guid("1cc606a4-c80f-4dce-acea-9b6dc2a46391");
+                return new Guid("cfa97a75-5f53-4a18-a6d2-2cf958631248");
             }
         }
 
