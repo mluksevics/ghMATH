@@ -4,6 +4,10 @@
 # User-specific files
 *.suo
 *.user
+ghMATH/bin/
+publish/
+exclude/
+references/
 *.userosscache
 *.sln.docstates
 
