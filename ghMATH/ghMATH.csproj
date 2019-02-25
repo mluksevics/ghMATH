@@ -46,6 +46,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="RhinoCommon">
@@ -63,17 +64,22 @@
       <HintPath>C:\Program Files\Common Files\McNeel\Rhinoceros\5.0\Plug-ins\Grasshopper (b45a29b1-4343-4035-989e-044e8580d9cf)\0.9.76.0\GH_IO.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="System.XML" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Class1.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="ghMATHComponent.cs" />
+    <Compile Include="components\GHcalculateMath.cs" />
+    <Compile Include="components\GHinputVariables.cs" />
     <Compile Include="ghMATHInfo.cs" />
     <Compile Include="classes\ghMathParser.cs" />
     <Compile Include="classes\ghMathProcessing.cs" />
     <Compile Include="classes\ghMathUnits.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Service References\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

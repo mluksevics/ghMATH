@@ -2,7 +2,7 @@
 using System.Drawing;
 using Grasshopper.Kernel;
 
-namespace ghMATH
+namespace ghMath
 {
     public class ghMATHInfo : GH_AssemblyInfo
     {

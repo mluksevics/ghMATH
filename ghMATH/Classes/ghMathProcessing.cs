@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
 
-namespace Sandbox.ghMath
+namespace ghMath
 {
     public class ghMathProcessing
     {

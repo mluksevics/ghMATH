@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Mathos.Parser;
 
-namespace Sandbox.ghMath
+namespace ghMath
 {
     class ghMathUnits
     {
