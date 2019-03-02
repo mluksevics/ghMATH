@@ -19,24 +19,38 @@ namespace ghMath
         /// new tabs/panels will automatically be created.
         /// </summary>
         public ghMATHComponent()
-          : base("ghMATH", "Nickname",
-              "Description",
-              "Category", "Subcategory")
+          : base("sMath Inputs", "Extract sMath inputs",
+              "Extract sMath input variables from the given spreadsheet",
+              "ghMath", "sMath processing")
         {
         }
+
+        // We'll start by declaring input parameters and initializing those.
+        string inputXML = string.Empty;
 
         /// <summary>
         /// Registers all the input parameters for this component.
         /// </summary>
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
+                // Use the pManager object to register your input parameters.
+                pManager.AddTextParameter("sMath XML", ".sm XML", "Contents of sMath .sm XML file", GH_ParamAccess.item);
         }
+
+        //Ddeclaring output parameters and initialising those.
+        List<string> outInputNames = new List<string>();
+        List<double> outInputValues = new List<double>();
+        List<string> outInputUnits = new List<string>();
 
         /// <summary>
         /// Registers all the output parameters for this component.
         /// </summary>
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
+            // Use the pManager object to register your output parameters.
+            pManager.AddTextParameter("sMath Variable Names", "Names", "Names of variables that can be assigned within sMath spreadsheet", GH_ParamAccess.list);
+            pManager.AddNumberParameter("sMath Variable default Values", "Values", "Default values of variables that can be assigned within sMath spreadsheet", GH_ParamAccess.list);
+            pManager.AddTextParameter("sMath Variable Units", "Units", "Units of variables that can be assigned within sMath spreadsheet", GH_ParamAccess.list);
         }
 
         /// <summary>
@@ -46,14 +60,43 @@ namespace ghMath
         /// to store data in output parameters.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+            // First, we need to retrieve all data from the input parameters.
+            // When data cannot be extracted from a parameter, we should abort this method.
+            if (!DA.GetData(0, ref inputXML)) return;
+
+
+            //Then let's clear and reset all output parameters.
+            // this is done to ensure that if function is repeadedly run, then parameters are re-read and redefined
+            outInputNames.Clear();
+            outInputValues.Clear();
+            outInputUnits.Clear();
+
+
+            //Then let's run the actual funcionality
+            ExtractMathInputs(inputXML, ref outInputNames, ref outInputValues, ref outInputUnits);
+
+            //Assign the ouputs to the output parameters
+            DA.SetDataList(0, outInputNames);
+            DA.SetDataList(1, outInputValues);
+            DA.SetDataList(2, outInputUnits);
+
+            //Finally clear all input parameters:
+            inputXML = string.Empty;
+        }
+
+        /// <summary>
+        /// This method takes sMath .sm file (XML format) and extracts all variables that are used as input (i.e. not calculated, not depending on other variables)
+        /// </summary>
+        /// <param name="inputXML">Input xml in string format</param>
+        /// <param name="inputParameterNames"> Extracted parameter names</param>
+        /// <param name="inputParameterDefaultValues">Extracted parameter default values</param>
+        /// <param name="inputParameterUnits">Extracted parameter default units</param>
+        private void ExtractMathInputs(string inputXML, ref List<string> inputParameterNames, ref List<double> inputParameterDefaultValues, ref List<string> inputParameterUnits)
+        {
+
             // loading the XML data
             XmlDocument doc = new XmlDocument();
-            doc.LoadXml(xmlInputBox.Text);
-
-            //defining lists for output;
-            List<string> inputParameterNames = new List<string>();
-            List<string> inputParameterUnits = new List<string>();
-            List<double> inputParameterDefaultValues = new List<double>();
+            doc.LoadXml(inputXML);
 
             //sMath content regions
             XmlNode smathContentRegions = doc.DocumentElement.ChildNodes[1];
@@ -75,7 +118,7 @@ namespace ghMath
 
                 //convert XML to "readable" equation
                 string singleExpression = ghMath.ghMathProcessing.ConvertXMLequationToString(mathInputEqationNode);
-                
+
 
                 //extracting the variable name of equation 
                 string[] splitExpression = singleExpression.Split('=');
@@ -126,14 +169,11 @@ namespace ghMath
                     inputParameterNames.Add(ghMath.ghMathProcessing.ReinstateRestrictedVariableNamesCharacters(expressionParameter));
                     inputParameterUnits.Add(expressionUnits);
                     inputParameterDefaultValues.Add(expressionDetfaultValue);
-
-
-                    resultsBox.Items.Add(ghMath.ghMathProcessing.ReinstateRestrictedVariableNamesCharacters(expressionParameter) + "=" + expressionDetfaultValue + " " + expressionUnits);
                 }
-
             }
 
         }
+
 
         /// <summary>
         /// Provides an Icon for every component that will be visible in the User Interface.
@@ -156,7 +196,7 @@ namespace ghMath
         /// </summary>
         public override Guid ComponentGuid
         {
-            get { return new Guid("f4d401df-5224-49ef-a718-32f510126872"); }
+            get { return new Guid("84e018b0-37d9-4b0a-a56a-e072c48c4c88"); }
         }
     }
 }

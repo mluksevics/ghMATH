@@ -15,24 +15,46 @@ namespace ghMath
         /// Initializes a new instance of the calculateMath class.
         /// </summary>
         public calculateMath()
-          : base("calculateMath", "Nickname",
-              "Description",
-              "Category", "Subcategory")
+          : base("sMath Calculaton", "Run sMath calc.",
+              "Run calculations based on process defined in sMath spreadsheet",
+              "ghMath", "sMath processing")
         {
         }
+
+        // We'll start by declaring input parameters and initializing those.
+        string inputXML = string.Empty;
+        List<string> inputNames = new List<string>();
+        List<double> inputValues = new List<double>();
+        List<string> inputUnits = new List<string>();
 
         /// <summary>
         /// Registers all the input parameters for this component.
         /// </summary>
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
+            // Use the pManager object to register your input parameters.
+            pManager.AddTextParameter("sMath XML", ".sm XML", "Contents of sMath .sm XML file", GH_ParamAccess.item);
+            pManager.AddTextParameter("sMath input Names", "In Names", "Names of input variables", GH_ParamAccess.list);
+            pManager.AddNumberParameter("sMath input values", "In Values", "Values of input variables for sMath spreadsheet", GH_ParamAccess.list);
+            pManager.AddTextParameter("sMath input units", "In Units", "Units of variables for sMath spreadsheet", GH_ParamAccess.list);
         }
+
+        //Ddeclaring output parameters and initialising those.
+        string outputXML = string.Empty;
+        List<string> outputNames = new List<string>();
+        List<double> outputValues = new List<double>();
+        List<string> outputUnits = new List<string>();
 
         /// <summary>
         /// Registers all the output parameters for this component.
         /// </summary>
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
+            // Use the pManager object to register your output parameters.
+            pManager.AddTextParameter("sMath XML", ".sm XML", "Output of .sm XML file contents after calculation", GH_ParamAccess.item);
+            pManager.AddTextParameter("sMath output Names", "Out Names", "Names of output variables", GH_ParamAccess.list);
+            pManager.AddNumberParameter("sMath output values", "Out Values", "Values of output variables for sMath spreadsheet", GH_ParamAccess.list);
+            pManager.AddTextParameter("sMath output units", "Out Units", "Units of variables for sMath spreadsheet", GH_ParamAccess.list);
         }
 
         /// <summary>
@@ -41,27 +63,59 @@ namespace ghMath
         /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+            // First, we need to retrieve all data from the input parameters.
+            // When data cannot be extracted from a parameter, we should abort this method.
+            if (!DA.GetData(0, ref inputXML)) return;
+            DA.GetData(1, ref inputNames);
+            DA.GetData(2, ref inputValues);
+            DA.GetData(3, ref inputUnits);
 
+            //Then let's clear and reset all output parameters.
+            // this is done to ensure that if function is repeadedly run, then parameters are re-read and redefined
+            outputNames.Clear();
+            outputValues.Clear();
+            outputUnits.Clear();
+
+            //Then let's run the actual funcionality
+            CalculateMath(
+            inputXML,
+            inputNames,
+            inputValues,
+            inputUnits,
+            ref outputNames,
+            ref outputValues,
+            ref outputUnits
+            );
+
+            //Assign the ouputs to the output parameters
+            DA.SetDataList(0, "");
+            DA.SetDataList(1, outputNames);
+            DA.SetDataList(2, outputValues);
+            DA.SetDataList(3, outputUnits);
+
+            //Finally clear all input parameters:
+            inputXML = string.Empty;
+            inputNames.Clear();
+            inputValues.Clear();
+            inputUnits.Clear();
+
+        }
+
+        private void CalculateMath(
+            string inputXML,
+            List<string> inputVariablesNames,
+            List<double> inputVariablesValues,
+            List<string> inputVariablesUnits,
+            ref List<string> outputVariablesNames,
+            ref List<double> outputVariablesValues,
+            ref List<string> outputVariablesUnits
+            )
+
+        {
             // loading the XML data
             XmlDocument doc = new XmlDocument();
-            if (xmlInputBox.Text == string.Empty) return;
-            doc.LoadXml(xmlInputBox.Text);
-
-            // loading information about input variables
-            //for testing purposes only - this will be replaced by lists from Grasshopper
-            List<string> inputVariablesNames = new List<string>();
-            List<double> inputVariablesValues = new List<double>();
-            List<string> inputVariablesUnits = new List<string>();
-            //inputVariablesNames.Add("a");
-            //inputVariablesValues.Add(3.3);
-            //inputVariablesUnits.Add("mm");
-
-            List<string> outputVariablesNames = new List<string>();
-            List<double> outputVariablesValues = new List<double>();
-            List<string> outputVariablesUnits = new List<string>();
-            //outputVariablesNames.Add("a");
-            //outputVariablesValues.Add(3.3);
-            //outputVariablesUnits.Add("mm");
+            if (inputXML == string.Empty) return;
+            doc.LoadXml(inputXML);
 
 
             //defining list with expressions
@@ -201,13 +255,9 @@ namespace ghMath
                     outputVariablesValues.Add(resultOuputValue);
                     outputVariablesUnits.Add(resultUnitsExpression);
 
-                    resultVariablesBox.Items.Add(expressionVariableWithDots);
-                    resultsBox.Items.Add(resultOuputValue);
-                    resultUnitsBox.Items.Add(resultUnitsExpression);
-
-                    expressionsBox.Items.Add(ghMath.ghMathProcessing.ReinstateRestrictedVariableNamesCharacters(singleExpression));
                 }
             }
+
 
         }
 
@@ -229,7 +279,7 @@ namespace ghMath
         /// </summary>
         public override Guid ComponentGuid
         {
-            get { return new Guid("859bf7d5-6d3c-4d96-b217-44413fdb342d"); }
+            get { return new Guid("7fa0327b-f9d7-49ec-bbea-271577c33f1b"); }
         }
     }
 }
