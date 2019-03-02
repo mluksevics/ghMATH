@@ -114,7 +114,17 @@ namespace ghMath
                 XmlNode mathNode = node.ChildNodes[0];
 
                 //accessing XML node with input equation
-                XmlNode mathInputEqationNode = mathNode.ChildNodes[0];
+                XmlNode mathInputEqationNode;
+                int hasDescriptionNode = 0;
+                if (mathNode.ChildNodes[0].Name == "description")
+                {
+                    mathInputEqationNode = mathNode.ChildNodes[1];
+                    hasDescriptionNode++;
+                }
+                else
+                {
+                    mathInputEqationNode = mathNode.ChildNodes[0];
+                }
 
                 //convert XML to "readable" equation
                 string singleExpression = ghMath.ghMathProcessing.ConvertXMLequationToString(mathInputEqationNode);
@@ -129,7 +139,7 @@ namespace ghMath
 
                 //further seeing whether there is a result part of the XML node with expression
                 //if there is only one "childnode" , that will be input and everything is alright
-                if (mathNode.ChildNodes.Count > 1)
+                if (mathNode.ChildNodes.Count > (1+hasDescriptionNode))
                 {
                     //if there is a result part, then skip this node with math region and go to next;
                     continue;

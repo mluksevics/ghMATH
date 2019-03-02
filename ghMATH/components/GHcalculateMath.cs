@@ -66,9 +66,9 @@ namespace ghMath
             // First, we need to retrieve all data from the input parameters.
             // When data cannot be extracted from a parameter, we should abort this method.
             if (!DA.GetData(0, ref inputXML)) return;
-            DA.GetData(1, ref inputNames);
-            DA.GetData(2, ref inputValues);
-            DA.GetData(3, ref inputUnits);
+            DA.GetDataList(1, inputNames);
+            DA.GetDataList(2, inputValues);
+            DA.GetDataList(3, inputUnits);
 
             //Then let's clear and reset all output parameters.
             // this is done to ensure that if function is repeadedly run, then parameters are re-read and redefined
