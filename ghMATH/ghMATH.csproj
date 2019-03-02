@@ -67,6 +67,7 @@
     <Reference Include="System.XML" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="classes\ghXMLProcess.cs" />
     <Compile Include="components\GHcalculateMath.cs" />
     <Compile Include="components\GHinputVariables.cs" />
     <Compile Include="ghMATHInfo.cs" />

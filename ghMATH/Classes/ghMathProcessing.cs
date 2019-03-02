@@ -51,8 +51,6 @@ namespace ghMath
             foreach (XmlNode singleExpressionElement in mathNode.ChildNodes)
             {
 
-
-
                 //temporary variables to enable use of stack.pop(). i.e. we will need to operate with top two values on the stack
                 string temp1;
                 string temp2;
@@ -159,8 +157,6 @@ namespace ghMath
             return fullExpresion;
 
         }
-
-
 
     }
 }

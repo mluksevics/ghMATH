@@ -6,6 +6,8 @@ using System.Linq;
 using Mathos.Parser;
 using System.Xml;
 using System.Globalization;
+using ghMath;
+using System.IO;
 
 namespace ghMath
 {
@@ -75,6 +77,7 @@ namespace ghMath
             outputNames.Clear();
             outputValues.Clear();
             outputUnits.Clear();
+            outputXML = string.Empty;
 
             //Then let's run the actual funcionality
             CalculateMath(
@@ -84,11 +87,11 @@ namespace ghMath
             inputUnits,
             ref outputNames,
             ref outputValues,
-            ref outputUnits
-            );
+            ref outputUnits,
+            ref outputXML);
 
             //Assign the ouputs to the output parameters
-            DA.SetDataList(0, "");
+            DA.SetData(0, outputXML);
             DA.SetDataList(1, outputNames);
             DA.SetDataList(2, outputValues);
             DA.SetDataList(3, outputUnits);
@@ -108,12 +111,14 @@ namespace ghMath
             List<string> inputVariablesUnits,
             ref List<string> outputVariablesNames,
             ref List<double> outputVariablesValues,
-            ref List<string> outputVariablesUnits
+            ref List<string> outputVariablesUnits,
+            ref string outputXML
             )
 
         {
             // loading the XML data
             XmlDocument doc = new XmlDocument();
+            //doc.PreserveWhitespace = true;
             if (inputXML == string.Empty) return;
             doc.LoadXml(inputXML);
 
@@ -138,34 +143,20 @@ namespace ghMath
             //                      >> result (this is result)
 
             //sMath content regions
-            XmlNode smathContentRegions = doc.DocumentElement.ChildNodes[1];
+
+            XmlNode smathContentRegions;
+            ghXMLProcess.ExtractRegionNodes(doc, out smathContentRegions);
 
             // processing XML nodes describing regions
             foreach (XmlNode node in smathContentRegions.ChildNodes)
             {
-                // first checking whether this is math region
-                // image, text, graphs are not processed
-                if (node.ChildNodes[0].Name != "math") continue;
-
-                //accessing XML node with math
-                XmlNode mathNode = node.ChildNodes[0];
-
-                //accessing XML node with input equation
+                //accessing XML nodes with input equation and results
+                XmlNode mathDescriptionNode;
                 XmlNode mathInputEqationNode;
-                int resultsNodeIndex;
-                if (mathNode.ChildNodes[0].Name == "description")
-                {
-                    mathInputEqationNode = mathNode.ChildNodes[1];
-                    resultsNodeIndex = 2;
+                XmlNode mathResultValueNode;
+                XmlNode mathResultUnitsNode;
+                if(!ghXMLProcess.ExtractMathNodes(node,out mathDescriptionNode, out mathInputEqationNode, out mathResultValueNode, out mathResultUnitsNode)) continue;
 
-                }
-                else
-                {
-                    mathInputEqationNode = mathNode.ChildNodes[0];
-                    resultsNodeIndex = 1;
-
-                }
-                //XmlNode mathInputEqationNode = mathNode.SelectSingleNode("/math/description[0]");
 
                 //convert XML to "readable" one line equation
                 //units will be already converted to SI system during the processing of equation
@@ -221,34 +212,28 @@ namespace ghMath
                 double resultUnitsConversion = 0;
                 double resultOuputValue = 0;
 
-                if (mathNode.ChildNodes[resultsNodeIndex] != null)
+                if (mathResultValueNode != null)
                 {
 
-                    if (mathNode.ChildNodes[resultsNodeIndex].Name == "contract")
+                    if (mathResultUnitsNode != null)
                     {
-                        XmlNode resultContractUnitsNode = mathNode.ChildNodes[resultsNodeIndex];
-                        XmlNode resultNode = mathNode.ChildNodes[resultsNodeIndex + 1];
-
-                        resultUnitsExpression = ghMath.ghMathProcessing.ConvertXMLequationToString(resultContractUnitsNode);
+                        resultUnitsExpression = ghMathProcessing.ConvertXMLequationToString(mathResultUnitsNode);
                         resultUnitsConversion = eval.Parse(resultUnitsExpression);
 
                         resultOuputValue = expressionResult / resultUnitsConversion;
-                        resultNode.ChildNodes[0].InnerText = resultOuputValue.ToString();
+                       // mathResultValueNode.ChildNodes[0].InnerText = resultOuputValue.ToString();
                     }
 
                     //if there are no "forced" units, then default output will be in SI units, so, just write the result into XML node.
-                    //if (mathNode.ChildNodes[1].Name == "result")
                     else
                     {
-                        XmlNode resultNode = mathNode.ChildNodes[resultsNodeIndex];
-                        resultNode.ChildNodes[0].InnerText = expressionResult.ToString();
-
-                        resultOuputValue = expressionResult;
                         resultUnitsExpression = "";
+                        resultOuputValue = expressionResult;
+                        //mathResultValueNode.ChildNodes[0].InnerText = expressionResult.ToString();
                     }
 
                     //convert to variable names with dots
-                    string expressionVariableWithDots = ghMath.ghMathProcessing.ReinstateRestrictedVariableNamesCharacters(expressionVariable);
+                    string expressionVariableWithDots = ghMathProcessing.ReinstateRestrictedVariableNamesCharacters(expressionVariable);
 
                     //add variables for GH output:
                     outputVariablesNames.Add(expressionVariableWithDots);
@@ -257,6 +242,16 @@ namespace ghMath
 
                 }
             }
+
+
+            //update XML file with the inputs and outputs just defined
+            ghXMLProcess.UpdateSmathXMLwithResults(ref doc, inputVariablesNames, inputVariablesValues, outputVariablesNames, outputVariablesValues);
+
+            StreamWriter writer = new StreamWriter(@"C:\t\test2.sm");
+            writer.Write(doc.OuterXml);
+            writer.Close();
+
+            outputXML = doc.OuterXml;
 
 
         }

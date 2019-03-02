@@ -98,33 +98,30 @@ namespace ghMath
             XmlDocument doc = new XmlDocument();
             doc.LoadXml(inputXML);
 
+            //sMath document structure
+            //  >> worksheet
+            //       >>[0] Settings
+            //       >>[1] Regions
+            //             >> region
+            //                   >> math
+            //                      >> input (math equation sits here)
+            //                      >> contract (this are "forced" units for result display)
+            //                      >> result (this is result)
+
+
             //sMath content regions
-            XmlNode smathContentRegions = doc.DocumentElement.ChildNodes[1];
+            XmlNode smathContentRegions;
+            ghXMLProcess.ExtractRegionNodes(doc, out smathContentRegions);
 
             // processing XML node-by-node
             foreach (XmlNode node in smathContentRegions.ChildNodes)
             {
-                // reading from XML and assigning to variables
-                if (node.ChildNodes[0].Name != "math")
-                {
-                    continue;
-                }
-
-                //accessing XML node with math
-                XmlNode mathNode = node.ChildNodes[0];
-
-                //accessing XML node with input equation
+                //accessing XML nodes with input equation and results
+                XmlNode mathDescriptionNode;
                 XmlNode mathInputEqationNode;
-                int hasDescriptionNode = 0;
-                if (mathNode.ChildNodes[0].Name == "description")
-                {
-                    mathInputEqationNode = mathNode.ChildNodes[1];
-                    hasDescriptionNode++;
-                }
-                else
-                {
-                    mathInputEqationNode = mathNode.ChildNodes[0];
-                }
+                XmlNode mathResultValueNode;
+                XmlNode mathResultUnitsNode;
+                if (!ghXMLProcess.ExtractMathNodes(node, out mathDescriptionNode, out mathInputEqationNode, out mathResultValueNode, out mathResultUnitsNode)) continue;
 
                 //convert XML to "readable" equation
                 string singleExpression = ghMath.ghMathProcessing.ConvertXMLequationToString(mathInputEqationNode);
@@ -138,24 +135,26 @@ namespace ghMath
 
 
                 //further seeing whether there is a result part of the XML node with expression
-                //if there is only one "childnode" , that will be input and everything is alright
-                if (mathNode.ChildNodes.Count > (1+hasDescriptionNode))
-                {
-                    //if there is a result part, then skip this node with math region and go to next;
-                    continue;
-                }
+                //if there is a result part, then skip this node with math region and go to next;
+                if (mathResultValueNode != null) continue;
+
 
                 //separate variable value from the units;
                 string expressionUnits;
                 string expressionDetfaultValueString;
 
+                //find where the first multiplication sign is located
                 int firstAsterixIndex = expressionEquation.IndexOf('*');
+
+                //if there is no units - no multiplication sign in equation:
                 if (firstAsterixIndex == -1)
                 {
                     expressionDetfaultValueString = expressionEquation;
                     expressionUnits = "";
 
                 }
+
+                //if there are defined units - find first multiplocation sign and separate the units from numeric value
                 else
                 {
                     string variableValueString = expressionEquation.Substring(0, firstAsterixIndex);
@@ -165,14 +164,8 @@ namespace ghMath
                     expressionUnits = "(" + variableUnitString;
                 }
 
-                //replace brackets added in equation conversion process. Initially replaces with blanks and then trimmed
-                //string expressionDetfaultValueString = variableValueString.Replace("(", "").Trim();
-                //string expressionUnits = ReplaceLastOccurrence(variableUnitString, ")","").Trim() ;
-
-                //defining variable for trying to parse default value from string to double
-                double expressionDetfaultValue = 0;
-
                 //check if units are valid and value is double. If yes - add values to the list
+                double expressionDetfaultValue = 0;
                 if (double.TryParse(expressionDetfaultValueString, NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out expressionDetfaultValue))
                 {
                     //add input parameters to the list;
