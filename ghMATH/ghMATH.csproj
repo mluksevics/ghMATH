@@ -67,9 +67,6 @@
     <Reference Include="System.XML" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Class1.cs">
-      <SubType>Form</SubType>
-    </Compile>
     <Compile Include="components\GHcalculateMath.cs" />
     <Compile Include="components\GHinputVariables.cs" />
     <Compile Include="ghMATHInfo.cs" />
