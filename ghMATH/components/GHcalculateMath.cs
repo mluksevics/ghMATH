@@ -28,6 +28,7 @@ namespace ghMath
         List<string> inputNames = new List<string>();
         List<double> inputValues = new List<double>();
         List<string> inputUnits = new List<string>();
+        string outputXMLpath = string.Empty;
 
         /// <summary>
         /// Registers all the input parameters for this component.
@@ -39,6 +40,10 @@ namespace ghMath
             pManager.AddTextParameter("sMath input Names", "In Names", "Names of input variables", GH_ParamAccess.list);
             pManager.AddNumberParameter("sMath input values", "In Values", "Values of input variables for sMath spreadsheet", GH_ParamAccess.list);
             pManager.AddTextParameter("sMath input units", "In Units", "Units of variables for sMath spreadsheet", GH_ParamAccess.list);
+            pManager.AddTextParameter("sMath file output path", "Out file path", "File path where .sm with outputs is to be saved ", GH_ParamAccess.item);
+
+            pManager[4].Optional = true; //it is not mandatory to enter path for output of .sm file. If no path is provied, the file just does not get saved.
+
         }
 
         //Ddeclaring output parameters and initialising those.
@@ -71,6 +76,7 @@ namespace ghMath
             DA.GetDataList(1, inputNames);
             DA.GetDataList(2, inputValues);
             DA.GetDataList(3, inputUnits);
+            DA.GetData(4, ref outputXMLpath);
 
             //Then let's clear and reset all output parameters.
             // this is done to ensure that if function is repeadedly run, then parameters are re-read and redefined
@@ -85,6 +91,7 @@ namespace ghMath
             inputNames,
             inputValues,
             inputUnits,
+            outputXMLpath,
             ref outputNames,
             ref outputValues,
             ref outputUnits,
@@ -101,6 +108,7 @@ namespace ghMath
             inputNames.Clear();
             inputValues.Clear();
             inputUnits.Clear();
+            outputXMLpath = string.Empty;
 
         }
 
@@ -109,6 +117,7 @@ namespace ghMath
             List<string> inputVariablesNames,
             List<double> inputVariablesValues,
             List<string> inputVariablesUnits,
+            string outputXMLpath,
             ref List<string> outputVariablesNames,
             ref List<double> outputVariablesValues,
             ref List<string> outputVariablesUnits,
@@ -118,7 +127,6 @@ namespace ghMath
         {
             // loading the XML data
             XmlDocument doc = new XmlDocument();
-            //doc.PreserveWhitespace = true;
             if (inputXML == string.Empty) return;
             doc.LoadXml(inputXML);
 
@@ -247,11 +255,19 @@ namespace ghMath
             //update XML file with the inputs and outputs just defined
             ghXMLProcess.UpdateSmathXMLwithResults(ref doc, inputVariablesNames, inputVariablesValues, outputVariablesNames, outputVariablesValues);
 
-            StreamWriter writer = new StreamWriter(@"C:\t\test2.sm");
-            writer.Write(doc.OuterXml);
-            writer.Close();
+            //format XML to include indents and line-breaks. This is only done to improve readability of ouput file
+            string formattedXML = ghXMLProcess.FormatXMLString(doc.OuterXml);
 
-            outputXML = doc.OuterXml;
+            //checking whether the output file path has been provided and writing to file.
+            if (outputXMLpath != string.Empty)
+            {
+                StreamWriter writer = new StreamWriter(outputXMLpath);
+                writer.Write(formattedXML);
+                writer.Close();
+            }
+
+            //output XML to output parameter. Note that many special characters are "lost" when output to Grasshopper panel
+            outputXML = formattedXML;
 
 
         }
