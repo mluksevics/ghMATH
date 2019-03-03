@@ -19,11 +19,12 @@ namespace ghMath
         /// new tabs/panels will automatically be created.
         /// </summary>
         public ghMATHComponent()
-          : base("sMath Inputs", "Extract sMath inputs",
+          : base( "Extract sMath inputs", "sMath Inputs",
               "Extract sMath input variables from the given spreadsheet",
-              "ghMath", "sMath processing")
+              "ghMath", "sMath")
         {
         }
+
 
         // We'll start by declaring input parameters and initializing those.
         string inputXML = string.Empty;
@@ -186,9 +187,9 @@ namespace ghMath
         {
             get
             {
-                // You can add image files to your project resources and access them like this:
-                //return Resources.IconForThisComponent;
-                return null;
+                    //You can add image files to your project resources and access them like this:
+                    // return Resources.IconForThisComponent;
+                    return ghMath.Properties.Resources.icon_input;
             }
         }
 

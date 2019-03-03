@@ -10,7 +10,7 @@ namespace ghMath
         {
             get
             {
-                return "ghMATH";
+                return "ghMath";
             }
         }
         public override Bitmap Icon

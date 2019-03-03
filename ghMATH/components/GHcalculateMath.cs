@@ -17,11 +17,12 @@ namespace ghMath
         /// Initializes a new instance of the calculateMath class.
         /// </summary>
         public calculateMath()
-          : base("sMath Calculaton", "Run sMath calc.",
+          : base( "Run sMath calc.", "sMath Calculaton",
               "Run calculations based on process defined in sMath spreadsheet",
-              "ghMath", "sMath processing")
+              "ghMath", "sMath")
         {
         }
+
 
         // We'll start by declaring input parameters and initializing those.
         string inputXML = string.Empty;
@@ -281,7 +282,7 @@ namespace ghMath
             {
                 //You can add image files to your project resources and access them like this:
                 // return Resources.IconForThisComponent;
-                return null;
+                return ghMath.Properties.Resources.icon_calculate;
             }
         }
 
