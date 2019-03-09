@@ -186,11 +186,18 @@ namespace ghMath
                 //now lets check whether this variable is not already provided as input data
                 //if it does, then it gets converted to SI units and stored
                 //if it does not, then the expression (already in SI units) is evaluated and result stored;
-                if (inputVariablesNames.Contains(expressionVariable))
+                if (inputVariablesNames.Contains( ghMathProcessing.ReinstateRestrictedVariableNamesCharacters(expressionVariable)))
                 {
-                    int i = inputVariablesNames.IndexOf(expressionVariable);
-                    variableName = inputVariablesNames[i];
-                    variableValue = inputVariablesValues[i] * eval.Parse(inputVariablesUnits[i]);
+                    int i = inputVariablesNames.IndexOf(ghMathProcessing.ReinstateRestrictedVariableNamesCharacters(expressionVariable));
+                    variableName = ghMathProcessing.ReinstateRestrictedVariableNamesCharacters(inputVariablesNames[i]);
+                    if (inputVariablesUnits[i] == "")
+                    {
+                        variableValue = inputVariablesValues[i];
+                    }
+                    else
+                    {
+                        variableValue = inputVariablesValues[i] * eval.Parse(inputVariablesUnits[i]);
+                    }                    
                 }
                 else
                 {
@@ -198,7 +205,7 @@ namespace ghMath
                     variableName = expressionVariable;
                 }
 
-                //replace dots with symbol because dots can be used for variable name
+                //replace dots with symbol because dots can not be used for variable name
                 string variableNameWithoutDots = ghMath.ghMathProcessing.ReplaceRestrictedVariableNamesCharacters(variableName);
 
                 //storing the variable
