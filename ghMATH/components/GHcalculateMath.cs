@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using Grasshopper.Kernel;
-using Rhino.Geometry;
-using System.Linq;
+﻿using Grasshopper.Kernel;
 using Mathos.Parser;
-using System.Xml;
-using System.Globalization;
-using ghMath;
+using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Xml;
 
 namespace ghMath
 {
@@ -17,7 +13,7 @@ namespace ghMath
         /// Initializes a new instance of the calculateMath class.
         /// </summary>
         public calculateMath()
-          : base( "Run sMath calc.", "sMath Calculaton",
+          : base("Run sMath calc.", "sMath Calculaton",
               "Run calculations based on process defined in sMath spreadsheet",
               "ghMath", "sMath")
         {
@@ -164,7 +160,7 @@ namespace ghMath
                 XmlNode mathInputEqationNode;
                 XmlNode mathResultValueNode;
                 XmlNode mathResultUnitsNode;
-                if(!ghXMLProcess.ExtractMathNodes(node,out mathDescriptionNode, out mathInputEqationNode, out mathResultValueNode, out mathResultUnitsNode)) continue;
+                if (!ghXMLProcess.ExtractMathNodes(node, out mathDescriptionNode, out mathInputEqationNode, out mathResultValueNode, out mathResultUnitsNode)) continue;
 
 
                 //convert XML to "readable" one line equation
@@ -175,9 +171,45 @@ namespace ghMath
                 string[] splitExpression = singleExpression.Split('=');
 
                 //check the expression has two parts (variable and equation), assign variables
-                if (splitExpression.Length != 2) continue;
-                string expressionVariable = splitExpression[0];
-                string expressionEquation = splitExpression[1];
+                string expressionVariable = string.Empty;
+                string expressionEquation = string.Empty;
+
+
+                //if (singleExpression.Substring(0, 2) == "if")
+                //{
+                //    string ifExpression;
+                //    ifExpression = singleExpression.Trim();
+                //    ifExpression = ifExpression.Substring(3, ifExpression.Length - 3);
+                //    ifExpression = ifExpression.Substring(0, ifExpression.Length - 1);
+
+                //    string[] ifExpressionparts = ifExpression.Split(',');
+                //    double trueOrFalse = eval.Parse(ifExpressionparts[2]);
+
+                //    if (trueOrFalse == 1)
+                //    {
+                //        expressionVariable = ifExpressionparts[1].Split('=')[0];
+                //        expressionEquation = ifExpressionparts[1].Split('=')[1];
+                //    }
+                //    else
+                //    {
+                //        expressionVariable = ifExpressionparts[0].Split('=')[0];
+                //        expressionEquation = ifExpressionparts[0].Split('=')[1];
+                //    }
+
+
+
+                //}
+                //else 
+                if (splitExpression.Length == 2)
+                {
+                    expressionVariable = splitExpression[0];
+                    expressionEquation = splitExpression[1];
+                }
+                else
+                {
+                    continue;
+                }
+
 
                 //defining variables for storing the expression variable name and result;
                 string variableName;
@@ -186,8 +218,10 @@ namespace ghMath
                 //now lets check whether this variable is not already provided as input data
                 //if it does, then it gets converted to SI units and stored
                 //if it does not, then the expression (already in SI units) is evaluated and result stored;
-                if (inputVariablesNames.Contains( ghMathProcessing.ReinstateRestrictedVariableNamesCharacters(expressionVariable)))
+                if (inputVariablesNames.Contains(ghMathProcessing.ReinstateRestrictedVariableNamesCharacters(expressionVariable)))
                 {
+                    //input variable names contains "dots" in their names, therefore value from expression needs to be reinstated to have "dots" in name as well
+                    //variable name examples: "u.value" or "L.eff"
                     int i = inputVariablesNames.IndexOf(ghMathProcessing.ReinstateRestrictedVariableNamesCharacters(expressionVariable));
                     variableName = ghMathProcessing.ReinstateRestrictedVariableNamesCharacters(inputVariablesNames[i]);
                     if (inputVariablesUnits[i] == "")
@@ -197,7 +231,7 @@ namespace ghMath
                     else
                     {
                         variableValue = inputVariablesValues[i] * eval.Parse(inputVariablesUnits[i]);
-                    }                    
+                    }
                 }
                 else
                 {
@@ -237,7 +271,7 @@ namespace ghMath
                         resultUnitsConversion = eval.Parse(resultUnitsExpression);
 
                         resultOuputValue = expressionResult / resultUnitsConversion;
-                       // mathResultValueNode.ChildNodes[0].InnerText = resultOuputValue.ToString();
+                        // mathResultValueNode.ChildNodes[0].InnerText = resultOuputValue.ToString();
                     }
 
                     //if there are no "forced" units, then default output will be in SI units, so, just write the result into XML node.

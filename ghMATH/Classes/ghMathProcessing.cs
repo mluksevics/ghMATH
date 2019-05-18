@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using System.Xml;
 
 namespace ghMath
@@ -69,7 +65,7 @@ namespace ghMath
                     }
 
                     //if this is not a unit, but contains letters, then this is variable
-                    else if (!double.TryParse(singleExpressionElement.InnerText,out test))
+                    else if (!double.TryParse(singleExpressionElement.InnerText, out test))
                     {
                         expressionStack.Push(ReplaceRestrictedVariableNamesCharacters(singleExpressionElement.InnerText));
                     }
@@ -100,6 +96,7 @@ namespace ghMath
                             string op = singleExpressionElement.InnerText;
                             op = op.Replace("&gt;", ">");
                             op = op.Replace("&lt;", "<");
+                            op = op.Replace("&amp;", "&");
 
                             expressionStack.Push(" (" + temp1 + singleExpressionElement.InnerText + temp2 + ") ");
                         }

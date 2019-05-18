@@ -1,14 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Mathos.Parser;
+using System;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Mathos.Parser;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Xml;
-using System.Globalization;
 
 namespace ghMath
 {
@@ -30,15 +22,13 @@ namespace ghMath
             inputParser.LocalFunctions.Add("log", inputs => Math.Log(inputs[1], inputs[0]));
             inputParser.LocalFunctions.Add("min", inputs => inputs.Min());
             inputParser.LocalFunctions.Add("max", inputs => inputs.Max());
-            inputParser.LocalFunctions.Add("≤", inputs => inputs[0] <= inputs[1] ? 1 : 0);
-            inputParser.LocalFunctions.Add("≥", inputs => inputs[0] <= inputs[1] ? 1 : 0);
-            inputParser.LocalFunctions.Add("≡", inputs => inputs[0] == inputs[1] ? 1 : 0);
-            inputParser.LocalFunctions.Add("≠", inputs => inputs[0] != inputs[1] ? 1 : 0);
-            inputParser.LocalFunctions.Add("if", inputs => 
+            // inputParser.LocalFunctions.Add("&", inputs => inputs[0] == 1 && inputs[1] == 1 ? 1 : 0);
+            //inputParser.LocalFunctions.Add("|", inputs => inputs[0] == 1 || inputs[1] == 1 ? 1 : 0);
+            inputParser.LocalFunctions.Add("if", inputs =>
             {
-                if (inputs[3] == 1)
+                if (inputs[2] == 1)
                 {
-                    return inputs[0];
+                    return inputs[1];
                 }
                 else
                 {
@@ -49,6 +39,14 @@ namespace ghMath
 
             //remove % operator, because it is used as "units" to represent percent
             inputParser.Operators.Remove("%");
+            inputParser.Operators.Add("&", (a, b) => a == 1 && b == 1 ? 1 : 0);
+            inputParser.Operators.Add("|", (a, b) => a == 1 || b == 1 ? 1 : 0);
+            inputParser.Operators.Add("¤", (a, b) => a != b ? 1 : 0);
+            inputParser.Operators.Add("≤", (a, b) => a <= b ? 1 : 0);
+            inputParser.Operators.Add("≥", (a, b) => a >= b ? 1 : 0);
+            inputParser.Operators.Add("≡", (a, b) => a == b ? 1 : 0);
+            inputParser.Operators.Add("≠", (a, b) => a != b ? 1 : 0);
+
 
             //ADD UNITS
 
